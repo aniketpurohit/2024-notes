@@ -63,7 +63,7 @@ In Microsoft SQL Server called the Database Engine is a relational database syst
 > A data model is a collection of concepts, their relationships, and their constraints that are used to represent data of a real-world problem.
 user’s point of view, a relational database contains tables and nothing but tables.
 
-**General properties of relational database system**
+### General properties of relational database system
 
 - Rows in a table do not have any particular order.
 - Columns in a table do not have any particular order.
@@ -105,4 +105,27 @@ A table is in second normal form (2NF) if it is in 1NF and there is no non-key c
 **Third Normal Form**
 A table is in third normal form (3NF) if it is in 2NF and there are no functional dependencies between non-key columns.
 
-cont from page 11 entity relation
+## Entity-Relationship Model
+
+the data in a database easily can be designed using only one that contains all data. the main disadvantages of this if its high redundancy of data.
+The *entity-relationship* **ER** model is used to design relational databases by removing all existing redundancy in the data. the basic object of ER is an *entity* ( a-real world object ). Each entity has several attributes, which are properties of the entity.
+
+- **Atomic (or single valued)**
+  - represented by single value for a particular entity.
+  - most attributes are atomic.
+
+- **Multi-valued**
+  - may have one or more values for a particular entity.
+
+- **Composite**
+  - Composite attributes are not atomic because they are assembled using some other atomic attributes.
+
+besides entity and attribute, relationship is another basic concept of ER model.
+A relationship exists when an entity refers to one or more other entities. The number of participating entities defines the degree of a relationship.
+Every existing relationship between two entities must be one of the following three types: 1:1, 1:N, or M:N. (This property of a relationship is also called cardinality ratio.)
+
+### General syntax in ER
+
+- entities are modeled using rectangular boxes with the entity name written inside
+- Attributes are shown in ovals, and each attribute is attached to a particular entity (or relationship) using a straight line
+- relationships are modeled using diamonds, and entities participating in the relationship are attached to it using straight lines
