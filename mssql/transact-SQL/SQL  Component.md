@@ -171,6 +171,6 @@ special system variables  that can be used as if they were scalar constants.
 ![Global variables](../img/gloabal-variable.png)
 
 ### NULL values
-- special value that may be assigned to a column. 
-- used where information in a column is unknown or not applicable.
 
+- special value that may be assigned to a column.
+- used where information in a column is unknown or not applicable.
