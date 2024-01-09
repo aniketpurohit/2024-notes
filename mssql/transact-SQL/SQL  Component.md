@@ -38,11 +38,13 @@ T-SQL uses different data types, which can be categorized as
 ### Numeric Data types
 
 represents numbers
+
 ![numeric data types](../img/numeric-data-types.png)
 
 ### Character Data types
 
 - can be strings of single-byte characters or strings of Unicode character.
+
 ![Character data type](../img/character-data-types.png)
 
 ### temporal data types
@@ -76,7 +78,7 @@ the data value in T-SQL is by default specified as a string in format like 'mmm 
 
 - Binary data types
 
-  -![Binary Data type](../img/Binary-data-types.png)
+![Binary Data type](../img/Binary-data-types.png)
 
 - BIT
 - Large object data types
@@ -144,23 +146,33 @@ types of Aggregate functions
 TYPES of Scalar function s
 
 - Numeric
+
 ![numeric functions](../img/all-numeric.png)
+
 - Date
+
 ![date functions](../img/date-functions.png)
+
 - String
+
 ![string functions](../img/string-all.png)
+
 - System
 provide extensive information about database objects.
 most function uses a internal numeric indetifier(ID) which is assigned to the DB.
+
 ![system functions](../img/all-system-function.png)
+
 - Metadata
 information about the specified database and DB objects.
+
 ![metadata functions](../img/all-metadata-function.png)
 
 ### Scalar Operators
 
 - used for operation with scalar values
 - T-SQL supports numeric and Boolean operators
+
 ![Scalar Operators](../img/scalar-operators.png)
 
 ### Global variables
@@ -168,6 +180,7 @@ information about the specified database and DB objects.
 special system variables  that can be used as if they were scalar constants.
 
 - have to be preceded by the prefix @@.
+
 ![Global variables](../img/gloabal-variable.png)
 
 ### NULL values
