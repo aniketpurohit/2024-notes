@@ -98,12 +98,12 @@ the data value in T-SQL is by default specified as a string in format like 'mmm 
 - XML
 - Spatial
 - HIERARCHYID
-  - store an entire hierarchy. it is implemented as Common lanaguage Runtime.
+  - store an entire hierarchy. it is implemented as Common language Runtime.
   - user-defined type that comprises several system functions for creating and operating on hierarchy nodes.
-  - GetLevel(), GetAncestor(), GetDesendant(), Read().
+  - GetLevel(), GetAncestor(), GetDescendant(), Read().
 - TIMESTAMP
-  - column defined as VARBINARY(8) or BINARY(8), depneding on nullability of the column.
-  - TIMESTAMP columns can be used to determine the relatove time at which rows were last changed.
+  - column defined as VARBINARY(8) or BINARY(8), depending on nullability of the column.
+  - TIMESTAMP columns can be used to determine the relative time at which rows were last changed.
   - ROWVERSION is synonym for TIMESTAMP
 - User-Defined data types
 
@@ -128,7 +128,7 @@ allows you to store LOBs and to save storage space:
 
 ## Transact-SQL Functions
 
-### Aggregate Funtions
+### Aggregate Functions
 
 - Applied to a group of data values from a column.
 - always return a single value
@@ -159,7 +159,7 @@ TYPES of Scalar function s
 
 - System
 provide extensive information about database objects.
-most function uses a internal numeric indetifier(ID) which is assigned to the DB.
+most function uses a internal numeric identifier(ID) which is assigned to the DB.
 
 ![system functions](../img/all-system-function.png)
 
