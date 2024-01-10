@@ -445,13 +445,14 @@ FILESTREAM storage has to be enabled at two levels:
 - For the Windows operating system
 - For the particular database server instanc
 
-SQL Server Configuration Manager to enable FILESTREAM storage at the OS 
+SQL Server Configuration Manager to enable FILESTREAM storage at the OS
 level.
 open SQL Server Configuration Manager, type SQLServerManager15.msc in the Search field for SQL Server 2019 or type SQLServerManager14.msc for SQL Server 2017.
 
 FILESTEAM ACCESS LEVEL
 
 *method -1*
+
 - Disabled FILESTREAM storage is not allowed
 - Transact-SQL Access Enabled FILESTREAM data can be accessed using T-SQL statements.
 - Full Access Enabled FILESTREAM data can be accessed using T-SQL as well as from the OS.
@@ -459,6 +460,7 @@ FILESTEAM ACCESS LEVEL
 *method -2*
 
 - use the sp_configure system procedure with the filestream access level option:
+
 ```SQL
 EXEC sp_configure filestream_access _level 
 
