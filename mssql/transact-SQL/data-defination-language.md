@@ -283,8 +283,183 @@ CREATE TABLE works_on (
 
 #### *Possible problem with referential integrity*
 
-**CASE 1** Insert a new row into *refrence table* for which data is not available in parent table.
+**CASE 1** Insert a new row into *reference table* for which data is not available in parent table.
 *WHAT HAPPENS* the DB Engine rejects the insertion of new row.
 
 **CASE 2** Modify the data of *reference table* for which data is not present in *Parent table* (in case of above SQL query )
 *WHAT HAPPENS* The DB Engine rejects the modification of rows in *reference table*
+
+**CASE 3** Modify the employee number in the parent table
+*WHAT HAPPENS* if the referenced table is using the data that will be modified in the parent table. it will reject the changes on parent table.
+
+**CASE 4** Delete of rows in parent table
+*WHAT HAPPENS* the deletion would remove the employee for which matching rows exists in the referencing table.
+
+#### ON DELETE and ON UPDATE Options
+
+- **NO ACTION**
+  - allows you to modify (update or delete) only those values of the parent table do have any corresponding values in foreign key of the referencing table.
+
+- **CASCADE**
+  - allows you to modify all values of the parent table.
+  - A row ion referencing table is modified if the corresponding value in the primary key of the parent has been updated.
+
+- **SET NULL**
+  - allows you to modify all values of the parent table.
+  - update a value of parent table and this modification would lead to data inconsistences in the referencing table to NULL.
+
+- **SET DEFAULT**
+  - Analogous to SET NULL option, with one exception: all corresponding values in the foreign key are set to a default value.
+
+### Creating Other Database Objects
+
+- views
+  - virtual tables
+  - a view is derived from one or more table
+  - no physical storage is needed.
+
+- INDEX
+  - a new index on a specified table.
+  - the indices are primarily used to allow efficient access to the data stored on a disk.
+  
+- Stored procedure
+  - can be created using the corresponding `CREATE PROCEDURE` statement
+  
+- trigger
+  - specifies an action as a result of an operation.
+
+- synonym
+  - object that provides a link between itself and another object manged by the same or a linked database server.
+
+- schema
+  - includes statements for creation of table, views and user privileges.
+  > can think of schema as a construct that collects together several tables, corresponding views, and user privileges.
+  - a schema is defined as a collection of database objects that is owned by a single principal and forms a single namespace. A namespace is a set of objects that cannot have duplicate names.
+
+### Integrity Constants and Domains
+
+A *domain* is the set of all possible legitimate values of a table may contain. Use of data types to define the set of all possible values.
+
+FOR example zip code : we need to use CHECK to implement correctly.
+The T-SQL provide support for domains by creating alias data types using `CREATE TYPE` statement.
+
+#### Alias Data Types
+
+- defined by user using a existing base data types.
+- can be used with `CREATE TABLE` statement to define one or more columns.
+
+SYNTAX :
+
+```SQL
+CREATE TYPE [type_schema_name.] type_name{
+  [FROM base_type[(precision[,scale])][NULL | NOT NULL ]]
+  | [EXTERNAL NAME assembly_name {.class_name}]
+}
+```
+
+EXAMPLE:
+
+```sql
+USE sample;
+CREATE TYPE zip FROM SMALLINT NOT NULL;
+```
+
+> GENERALLY, DB Engine implicitly converts between compatible columns of different data types. This is valid for alias data types too
+
+#### CLR Data Types
+
+- The CREATE TYPE statement can also be applied to create a user-defined data type using .NET.
+- the implementation of a user-defined data type is defined in a class of an assembly in the Common Language Runtime (CLR).
+
+## Modifying Database Objects
+
+### Altering a Database
+
+- changes the physical structure of a database
+- allows  changing the following properties of a database
+  - Add or remove one or more database files, log files, or filegroups
+  - Modify file or filegroup properties
+  - Set database options
+  - Change the name of the database using the sp_rename stored procedure
+
+#### Adding or Removing Database Files, Log Files, or Filegroups
+
+`ALTER DATABASE` statement allows the addition and removal of database files.
+clauses `ADD FILE` and `REMOVE FILE` specify the addition of a new file and the deletion of an existing file, respectively.
+
+EXAMPLE:
+
+```SQL
+USE master;
+
+GO 
+ALTER DATABASE projects 
+ADD FILE (NAME=projects_dat1, 
+FILENAME = 'C:\temp\projects1.mdf',   SIZE = 10, 
+MAXSIZE = 100,   FILEGROWTH = 5);
+```
+
+The REMOVE FILE clause removes one or more files that belong to an existing  database. The file can be a data file or a log file. The file cannot be removed unless it is empty.
+e CREATE FILEGROUP clause creates a new filegroup, while DELETE FILEGROUP removes an existing filegroup from the system. you cannot remove a filegroup unless it is empty
+
+### Modifying File or Filegroup Properties
+
+can use the `MODIFY FILE` clause to change the following file properties:
+
+- Change the logical name of a file using the NEWNAME option of the `MODIFY FILE` clause
+- Increase the value of the SIZE property
+- Change the FILENAME, MAXSIZE, or FILEGROWTH property
+- Mark the file as OFFLINE
+
+can use the `MODIFY FILEGROUP` clause to change the following filegroup
+properties:
+
+- Change the name of a filegroup using the NAME option of the `MODIFY FILEGROUP` clause.
+- Mark the filegroup as the default filegroup using the DEFAULT option
+- Mark the filegroup as read-only or read-write using the `READ_ONLY` or `READ_WRITE` option
+
+#### Setting Database Options
+
+-used to set different database options.
+
+- Some options must be set to ON or OFF, but most of them have a list of possible values
+- database option has a default value, which is set in the model database.
+All options that you can set are divided into several groups:
+- State options
+- Auto options
+- SQL options
+
+state options control the following:
+
+- User access to the database (options are SINGLE_USER, RESTRICTED_USER, and MULTI_USER)
+- The status of the database (options are ONLINE, OFFLINE, and EMERGENCY)
+- The read/write modus (options are READ_ONLY and READ_WRITE)
+
+> SQL options control the ANSI compliance of the database and its objects
+>All SQL options can be edited using the DATABASEPROPERTYEX function and modified using the ALTER DATABASE statement
+
+### Storing FILESTREAM Data
+
+FILESTREAM storage has to be enabled at two levels:
+
+- For the Windows operating system
+- For the particular database server instanc
+
+SQL Server Configuration Manager to enable FILESTREAM storage at the OS 
+level.
+open SQL Server Configuration Manager, type SQLServerManager15.msc in the Search field for SQL Server 2019 or type SQLServerManager14.msc for SQL Server 2017.
+
+FILESTEAM ACCESS LEVEL
+
+*method -1*
+- Disabled FILESTREAM storage is not allowed
+- Transact-SQL Access Enabled FILESTREAM data can be accessed using T-SQL statements.
+- Full Access Enabled FILESTREAM data can be accessed using T-SQL as well as from the OS.
+
+*method -2*
+
+- use the sp_configure system procedure with the filestream access level option:
+```SQL
+EXEC sp_configure filestream_access _level 
+
+```
