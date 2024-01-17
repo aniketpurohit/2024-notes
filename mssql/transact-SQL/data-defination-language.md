@@ -451,17 +451,126 @@ open SQL Server Configuration Manager, type SQLServerManager15.msc in the Search
 
 FILESTEAM ACCESS LEVEL
 
-*method -1*
+***method -1***
 
 - Disabled FILESTREAM storage is not allowed
 - Transact-SQL Access Enabled FILESTREAM data can be accessed using T-SQL statements.
 - Full Access Enabled FILESTREAM data can be accessed using T-SQL as well as from the OS.
 
-*method -2*
+***method -2***
 
 - use the sp_configure system procedure with the filestream access level option:
 
 ```SQL
-EXEC sp_configure filestream_access _level 
+EXEC sp_configure filestream_access _level, 2
+RECONFIGURE
 
+-- value 2 means "FULL Access Enabled"
 ```
+
+### Contained database
+
+One of the significant problems with SQL Server database is that they cannot be exported (or imported ) easily.
+Attaching and de-attaching has many important parts missing (security in general and existing login in particular )
+
+A contained database comprises all database setting and data required to specify the database and is isolated from the instance of the database engine on which it is installed.
+
+- Fully contained DB
+  - DB objects cannot cross the application boundary.
+  - An application boundary defines the scope of an application.
+- Partially contained DB
+  - allow database objects to cross the application boundary,
+- Nonconatined DB
+  - do not support the notion of an application boundary at all.
+
+## altering A table
+
+- modifies the schema of the table.
+  - Add or drop one or more columns
+  - Modify column properties
+  - Add or remove disable objects
+  - Enable or disable constraint
+  - rename tables another DB objects
+
+### Adding or Dropping a Column
+
+```SQL
+-- ADD clause 
+
+USE sample;
+ALTER TABLE employee ADD telephone_no CHAR(12) NULL;
+
+-- DROP Clause 
+ALTER TABLE employee DROP COLUMN telephone_no;
+```
+
+### Modifying Column properties
+
+- Data type
+- Nullability
+
+```SQL
+USE sample;
+ALTER TABLE department ALTER COLUMN location CHAR(12) NOT NULL;
+```
+
+## Adding or Removing Integrity Constraints
+
+```SQL
+USE sample;
+
+CREATE TABLE sales 
+  (order_no INTEGER NOT NULL,
+  order_date DATE NOT nULL,
+  ship_date DATE NOT NULL);
+  GO 
+  ALTER TABLE SALES 
+    ADD CONSTRAINT ORDER_CHECK CHECK(ORDER_DATE <= SHIP_DATE>)
+
+  -- add CONSTRAINT
+  ALTER TABLE SALES ADD CONSTRAINT PRIMARYK_SALES PRIMARY KEY(ORDER_NO);
+
+  -- DROP CONSTRAINT
+  ALTER TABLE SALES DROP CONSTRAINT ORDER_CHECK;
+```
+
+## Enabling or Disabling COnstraint
+
+an integrity constraint always has a name that can be explicitly declared using the `CONSTRAINT`option or implicitly declared by the system. the name of all declared constraint for a table can be viewed by `sp_helpconstraint`
+
+```sql
+ALTER TABLE sales NOCHECK CONSTRAINT ALL;
+```
+
+> Use of NOCHECK option is not recommended. Any constraint violations that are suppressed may cause updates to fail.
+
+### Rename Table and Other Database objects
+
+`sp_rename` system procedure modifies the name of an existing table
+
+```SQL
+USE sample;
+EXEC sp_rename @objname= department,@newname = subdivision
+-- changes the name from department to subdivision
+```
+
+> Do not use `sp_rename` system procedure, because changing object names can be influence other database objects that reference them.
+
+### Removing DB Objects
+
+used to remove DB object have the following general form:
+`DROP object_type object_name`
+
+remove one or more database
+`DROP TABLE table_name1 {,....}`
+> all data, indices, and triggers belonging to the removed table are also dropped. All views that are defined using the dropped table are not removed.
+
+Can also drop
+
+- TYPE
+- SYNONYM
+- PROCEDURE
+- INDEX
+- VIEW
+- TRIGGER
+- SCHEMA
