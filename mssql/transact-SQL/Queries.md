@@ -117,3 +117,37 @@ SELECT emp_no, ISNULL(job, 'job unknown') AS task from works_on where project_no
 ```
 
 ### LIKE operator
+
+- used for pattern matching, compares values with a specified pattern.
+- **pattern** may be string or expression  and must be compatible with the data type of the corresponding column.
+- Certain characters within pattern called *wildcard characters* have a specific interpretation.
+  - % any sequence of zero or more characters
+  - _ any single characters
+
+```SQL
+SELECt emp_fname, emp_lname, emp_no FROM employee WHERE emp_fname LIKE '_a%';
+
+-- all dept whose location begins with a charater in range C through F 
+SELECT dept_no, dept_name, location FROM department WHERE location LIKE '[C-F]%'
+
+
+--  numbers and first and last names of all employees whose last name does not begin with the letter J, K, L, M, N, or O and whose first name does not begin with the letter E or Z:
+
+SELECT emp_no, emp_fname, emp_lname FROM employee WHERE emp_lname LIKE '[^J-O]%'  AND emp_fname LIKE '[^EZ]%';
+
+--  full details of all employees whose first name does not end with the character n
+
+SELECT emp_no, emp_fname, emp_lname FROM employee WHERE emp_fname NOT LIKE '%n' ;
+
+
+```
+> Any wildcard within square brackets stands for itself or equivalent feature is available in ESCAPE option
+```SQL
+SELECT project_no, project_name FROM project WHERE project_name LIKE '%[_]%';
+
+-- OR 
+SELECT project_no, project_name FROM project WHERE project_name LIKE '%!_%' ESCAPE '!';
+```
+
+### GROUP BY clause
+
