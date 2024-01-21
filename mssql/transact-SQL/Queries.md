@@ -383,3 +383,145 @@ SET IDENTITY_INSERT table_name ON
 IDENTITY_INSERT option can be used to specify any values for a column with the IDENTITY property, IDENTITY does not generally enforce uniqueness.
 
 ## CREATE SEQUENCE statement
+
+Using `IDENTITY` property has several significant disadvantages, the most important of which are the following:
+
+- can  use it only with specified table.
+- cannot obtain the new value before using it.
+- can specify the `IDENTITY` property only when the column is created.
+
+THE DB Engine offers another solution called `SEQUENCES`.
+A `SEQUENCE` has the same semantics as the IDENTITY property but doesn't have the limitations.
+
+- enables you to specify a counter of values for different database objects, such as columns and variables.
+
+```SQL
+CREATE SEQUENCE dbo.Sequence1
+  AS INT
+  START WITH 1 INCREMENT BY 5
+  MINVALUE 1 MAXVALUE 256
+  CYCLE;
+
+  -- START specify the initial value for sequence called Sequence1 
+  -- INCREMENT clause defines teh incremental value.
+  -- MINVALUE or MAXVALUE defines the specifies minimal and maximum value of 
+  -- the CYCLE specifies it should restart from minimum value
+  -- default for CYCLE is no cycle 
+
+```
+
+> It is a table-independent
+the `NEXT VALUE FOR` expression can be used to create new sequence values
+
+```SQL
+SELECT NEXT VALUE FOR dbo.sequence1;
+SELECT NEXT VALUE FOR dbo.sequence1;
+```
+
+> can use the catalog view called ***sys.sequence*** to check the current value of the sequence, without using it.
+
+```SQL
+SELECT current_value from sys.sequences where name  = 'sequences'
+```
+
+`ALTER SEQUENCE` statement modifies the properties of an existing sequence. use si in the relation to `RESTART WITH` clause, which 'reseds' a given sequence
+
+```SQL
+ALTER SEQUENCE dbo.sequence1
+  RESTART WITH 100 
+  INCREMENT BY 50 
+  MINVALUE 50 
+  MAXVALUE 10000
+  NO CYCLE;
+
+  -- TO drop a sequence use DROP SEQUENCE
+```
+
+## SET operators
+
+### UNION
+
+union of two set of all elements appearing in either or both of the sets
+
+```SQL
+select_1 UNION [ALL] select_2 {[UNION [ALL] select_3]}
+
+-- select_1, select_2 are SELECT statements that build the union
+-- ALL options is used, all resulting rows, including duplicates, are displayed.
+-- the ALL option is the default in select statement, bit it must be specified with UNION operator to display all resulting rows.
+-- 
+```
+
+ALTERNATIVE WAY TO CREATE TABLE FROM AN EXISTING TABLE
+
+```SQL
+SELECT emp_no, emp_fname, emp_lname, dept_no 
+INTO employee_enh 
+FROM employee 
+ALTER TABLE employee_enh 
+ADD domicile CHAR(25) NULL;
+
+/*
+  EXAMPLE of UNION 
+*/
+
+SELECT domicile FROM employee_enh 
+UNION SELECT location FROM department
+```
+
+> `SELECT` lists ust have same number of columns and teh corresponding columns must have compatible data types. the ordering of the result of union can be done only if `ORDER BY` clause is used with last `SELECT statement`
+
+OR operator can be used instead of the UNION operator if all select statements connected by one or more UNION operators refrence the sam e table. the set of select statement si replaced through one `SELECT` statement with set of OR operators.
+
+### INTERSECT and EXCEPT
+
+intersection of two tables is the set of rows belonging to both tables.
+
+```SQL
+SELECT emp_no 
+  FROM employee
+  WHERE dept_no ='d1'
+INTERSECT 
+SELECT emp_no 
+  FROM works_on
+  WHERE enter_date < '01.01.2018';
+
+-- THE T-SQL does not support INTERSECT operator with ALL option
+
+SELECT emp_no from employee
+WHERE dept_no = 'd3'
+EXCEPT 
+SELECT emp_no 
+  FROM works_on
+  WHERE enter_date > '01.01.2018';
+```
+
+## CASE
+
+to modify the representation of data.
+> CASE does not represent a statement but a expression. Therefore case can be used anywhere.
+
+### SIMPLE CASE expression
+
+```SQL
+CASE expression_1
+  {WHEN expression_2 THEN result_1} ...
+  [ELSE result_n]
+END
+```
+
+EXAMPLEs
+
+```SQL
+SELECT ProductNumber, Category = 
+  CASE ProductLine
+    WHEN 'R' THEN 'Road'
+    WHEN 'M' THEN 'Monitoring'
+    WHEN 'T' THEN 'TOURING'
+    WHEN 'S' THEN 'OTHER SALE ITEMS'
+    ELSE 'NOT FOR SALE'
+  END
+  NAME FROM PRODUCTION.PRODUCT
+```
+
+## Subqueries
