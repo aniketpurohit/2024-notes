@@ -424,7 +424,7 @@ SELECT NEXT VALUE FOR dbo.sequence1;
 SELECT current_value from sys.sequences where name  = 'sequences'
 ```
 
-`ALTER SEQUENCE` statement modifies the properties of an existing sequence. use si in the relation to `RESTART WITH` clause, which 'reseds' a given sequence
+`ALTER SEQUENCE` statement modifies the properties of an existing sequence. use si in the relation to `RESTART WITH` clause, which 'reseeds' a given sequence
 
 ```SQL
 ALTER SEQUENCE dbo.sequence1
@@ -471,7 +471,7 @@ UNION SELECT location FROM department
 
 > `SELECT` lists ust have same number of columns and teh corresponding columns must have compatible data types. the ordering of the result of union can be done only if `ORDER BY` clause is used with last `SELECT statement`
 
-OR operator can be used instead of the UNION operator if all select statements connected by one or more UNION operators refrence the sam e table. the set of select statement si replaced through one `SELECT` statement with set of OR operators.
+OR operator can be used instead of the UNION operator if all select statements connected by one or more UNION operators reference the sam e table. the set of select statement si replaced through one `SELECT` statement with set of OR operators.
 
 ### INTERSECT and EXCEPT
 
@@ -574,7 +574,7 @@ SELECT emp_lname, FROM Employee
   -------------------------------------------
   operators ANY and ALL always use in combination with one of the comparison
 
-  SYNATAX 
+  SYNTAX 
 
   column_name operator [ANY | ALL] query 
 */
@@ -671,7 +671,253 @@ SELECT dept_no
   WHERE enter_date = '10.15.2017';
 ```
 
-#### Joining More than two tables
+### Joining More than two tables
 
 Theoretically, there is no upper limit on number of tables that can be joined using a SELECT statement.
 the DB Engine has an implementation restriction: the maximum number of  tables that can be joined in a select statement is 64.
+
+```SQL
+SELECT emp_fname, emp_lname
+  FROM works_on JOIN Employee ON works_on.emp_no = employee.emp_no 
+  Join department on employee.dept_no= department.dept_no 
+  and location='seattle'
+  and job ='analyst'
+```
+
+> if you join n tables, you need n-1 join conditions to avoid a cartesian product. Of course, using more than n-1 join conditions, as well as other conditions, is certainly permissible to further reduce the result set.
+
+### Cartesian Product
+
+A cartesian product combines each row of the first table with each row of second table.
+In general, the cartesian product of two tables such that first table has n rows and second table m rows will produce a result with n times m rows.
+
+```SQL
+SELECT employee.*, department.*
+  FROM employee CROSS JOIN department;
+```
+
+### Outer Join
+
+When one need the rows that does not have any matches in natural join. oUter join is used.
+
+all rows from the table on the left side of the operator are returned, whether or not they have a matching row in the table on the right
+
+right outer join is similar, but it returns all rows of the table on the right of the symbol. The Database Engine uses the operator RIGHT OUTER JOIN to specify the right outer join.
+
+```SQL
+SELECT employee_enh.*, department.location 
+  FROM employee_enh LEFT OUTER JOIN department 
+    ON domicile = location;
+
+SELECT employee_enh.domicile, department.* 
+  FROM employee_enh RIGHT OUTER JOIN department 
+    ON domicile =location;
+
+--LEFT OUTER JOIN
+SELECT employee_enh.*, department.location 
+   FROM employee_enh JOIN department 
+   ON domicile = location 
+UNION 
+SELECT employee_enh.*, 'NULL' 
+   FROM employee_enh 
+   WHERE NOT EXISTS 
+   (SELECT * 
+       FROM department 
+      WHERE location = domicile);
+```
+
+### Theta Join
+
+- Join columns need not be compared using the equality sign.
+- join operation using a general join condition is called a theta join.
+
+```SQL
+
+/*
+all the combinations of employee information and department information where the 
+domicile of an employee alphabetically precedes any location of departments.
+*/
+SELECT emp_fname, emp_lname, domicile, location 
+  FROM employee_enh JOIN department 
+  ON domicile < location;
+```
+
+### Self-Join or Joining a Table with itself
+
+a natural join operation can be applied to a single table.
+the table is joined with itself, where by a single column of the table is compared with itself.
+can be accomplished using at least one alias name.
+
+```SQL
+SELECT t1.dept_no, t1.dept_name, t1.location 
+  FROM department t1 JOIN department t2
+    ON t1.location = t2.location
+  WHERE t1.dept_no <> t2.dept_no;
+```
+
+### SEMI-JOIN
+
+similar to natural join, but the result of semi join is only the set of all rows from one table where one or more matches are found in the second table.
+
+```SQL
+SELECT emp_no, emp_lname, e.dept_no
+  FROM employee e JOIN department d
+  ON e.dept_no = d.dept_no
+  WHERE location = 'Dallas';
+```
+
+- is usually used in distributed query processing to minimize data transfer
+- DB engine uses semi-join operation to implement the feature called **star join**
+
+### Correlated Subqueries
+
+- if the inner query depends on the outer query for any of its values.
+
+```SQL
+SELECT emp_lname
+  FROM employee 
+  WHERE 'p3' IN (
+    SELECT project_no from works_on 
+    WHERE works_on.emp_no = employee.emp_no
+  );
+```
+
+#### Subqueries and the EXISTS Function
+
+takes an inner query as an argument and returns `TRUE` if the inner query returns one or more rows, and return `FALSE` if it returns zero rows.
+
+```SQL
+SELECT emp_lname FROM employee
+  WHERE EXISTS (
+    SELECT * FROM works_on 
+    WHERE employee.emp_no = works_on.emp_no 
+    AND project_no = 'p1'
+  ); 
+```
+
+```SQL
+SELECT emp_lname FROM employee
+  WHERE NOT EXISTS
+  (SELECT * from department 
+    WHERE employee.dept_no = department.dept_no 
+    AND location = 'Seattle'
+    );
+```
+
+##### Should you use joins or Subqueries ?
+
+- Writing the SELECT statement with join operator is often easier to read and understand and can also help the DB engine to find a more efficient strategy for retrieving the appropriate data.
+
+Subquery Advantages
+
+- when you have to calculate an aggregate value on-the-fly and use it in the other query for comparison.
+
+```SQL
+-- get teh number and enter date all employees with enter dates equal to the earliest date.
+SELECT emp_no, enter_date FROM works_on 
+  WHERE enter_date = (SELECT min(enter_date) FROM works_on);
+```
+
+##### JOIN Advantages
+
+- SELECT list in query contains columns from more than one table.
+
+```SQL
+SELECT employee.emp_no, emp_lname, job from employee, works_on 
+  WHERE employee.emp_no = works_on.emp_no
+  and enter_date = '10.15.2017'
+```
+
+## Table Expression
+
+are subqueries that are used where a table is excepted.
+
+### Derived tables
+
+- a table expression that appears in the FROM clause of query.
+- apply derived tables when the use of column is not possible because another clause is processed by the SQL translator before alias name is known.
+
+```SQL
+-- illegal statement
+SELECT MONTH(enter_date) as enter_month 
+  FROM works_on GROUP BY enter_month
+
+/*
+GROUP BY clause is processed before teh corresponding SELECT list. the alias *enter_month* is not known at the time
+*/
+
+SELECT enter_month 
+FROM (SELECT MONTH(enter_date) as enter_month FROM works_on) AS m
+GROUP BY enter_month;
+-- USED the DErived table 
+
+SELECT w.job , (SELECT e.emp_lname FROM employee e where e.emp_no = w.emp_no) AS name 
+WHERE works_on w
+WHERE w.job IN('Manager', 'Analyst')
+```
+
+### Common Table Expression (CTE)
+
+- a  named table expression that is supported by T-SQL
+- Queries that uses CTEs
+  - Nonrecursive queries
+  - Recursive queries
+
+#### CTEs and Nonrecursive Queries
+
+- can be used as alternative to derived tables and views.
+- CTE are defined using WITH statement and an additional query that refers to the name use in WITH
+
+> WITH keyword is ambiguous. To avoid ambiguity, you have to use a semicolon (;) to terminate the statement and an additional query
+
+```SQL
+SELECT SalesOrderID from Sales.SalesOrderHeader
+  WHERE TotalDue > (SELECT AVG(TotalDue) FROM Sales.SalesOrderHeader 
+    WHERE YEAR(OrderDate) = '2014')
+    AND Freight > (
+      SELECT AVG(TotalDue) FROM Sales.SalesOrderHeader
+        WHERE YEAR(OrderDate) = '2014') /2.5;
+
+-- a better way to write the above Query 
+WITH price_calc(year_2014) as (SELECT AVG(TotalDue)
+  FROM Sales.SalesOrderHeader WHERE YEAR(orderDate) ='2014'
+  )
+
+SELECT SalesOrderID FROM Sales.SalesOrderHeader
+WHERE TotalDue > (SELECT year_2014 FROM price_calc)
+And Freight > (SELECT year_2014 FROM price_calc)/2.5
+
+-- SYNTAX 
+WITH cte_name(column_list) AS (inner_query) outer_query;
+```
+
+### CTEs and Recursive Queries
+
+- can use CTEs to implement recursion because CTEs can contain reference to reading. The basic syntax for recursive queries
+
+```SQL
+WITH cte_name (column_list) as AS
+  (anchor_member UNION ALL recursive_member ) Outer query.
+
+-- The first operand of UNION ALL does not reference the CTE (see Example 6.80). This query is called the anchor query or seed.
+-- The second query contains a reference to the CTE and represents the recursive portion of it. For this reason it is called the recursive member
+
+WITH list_of_parts(assembly1, quantity, cost) AS 
+  (SELECT containing_assembly, quantity_contained, unit_cost 
+     FROM airplane 
+     WHERE contained_assembly IS NULL 
+  UNION ALL 
+  SELECT a.containing_assembly, a.quantity_contained, 
+         CAST(l.quantity*l.cost AS DECIMAL(6,2)) 
+         FROM list_of_parts l,airplane a  
+         WHERE l.assembly1 = a.contained_assembly) 
+SELECT * FROM list_of_parts;
+```
+
+There are several restrictions for a CTE in a recursive query:
+
+- The CTE definition must contain t least two SELECT statements( an  anchor and recursive) combined by the UNION ALL operator.
+- the number of columns in the anchor and recursive members must be the same.
+- the data  type of column in the recursive member must be the same as the data type of corresponding column in the anchor member.
+- The FORM clause of the recursive member must refer only once to the name of CTE.
+- The following option are not allowed in the definition of recursive part  SELECT DISTINCT, GROUP BY, HAVING,aggregate functions, TOP, and subqueries. Only join allowed is INNER JOIN
