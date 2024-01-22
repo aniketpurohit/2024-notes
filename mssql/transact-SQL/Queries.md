@@ -525,3 +525,153 @@ SELECT ProductNumber, Category =
 ```
 
 ## Subqueries
+
+T-SQL offers the ability to compare columns values with the result of another SELECT statement. SELECt statement of a subquery is called the *outer query* in contrast to the *inner query*, which denotes the SELECT statements used in comparison .
+The Inner query is evaluated first, the outer query receives the values of inner query.
+
+> An INNER query can also be nested in INSERT, UPDATE or DELETE statement.
+
+### Self-Contained and Correlated
+
+- inner query is logically evaluated exactly one.
+- whereas correlated subquery differs from a self-contained one in that its value depends upon a variable from outer query, therefore, INNER query is logically evaluated each time the system retrieves row from outer query.
+
+A self-contained subquery can be used with following operators.
+
+- Comparison operators
+- IN operators
+- ANY or ALL operator
+
+```SQL
+SELECT emp_fname, emp_lname FROM Employee
+  WHERE dept_no = (
+    SELECT dept_no FROM department WHERE dept_name = 'Research'
+  );
+
+-- The drawbacks of using = operator is the inner query must return one value. 
+
+/*
+  IN OPERATOR
+*/
+SELECT * from employee WHERE dept_no IN (
+  SELECT dept_no FROM department WHERE location = 'Dallas'
+);
+
+-- Each inner query may contain further queries ( subqueries with multiple level of nesting)
+-- 
+SELECT emp_lname, FROM Employee 
+  WHERE emp_no IN (
+    SELECT emp_no FROM works_on 
+      WHERE project_no IN 
+        (
+          SELECT project_no FROM project WHERE project_name ='Apollo'
+        )
+  );
+
+
+/*
+  WITH ANY and ALL operators 
+  -------------------------------------------
+  operators ANY and ALL always use in combination with one of the comparison
+
+  SYNATAX 
+
+  column_name operator [ANY | ALL] query 
+*/
+
+-- get employee numbers, project numbers, job names for employee who have not spent the most time on one of the projects 
+
+SELECT DISTINCT emp_no, project_no , job 
+  FROM works_on 
+  WHERE enter_date > ANY 
+  (
+    SELEcT enter_date FROM works_on
+  );
+
+```
+
+## Temporary Tables
+
+- A temporary table is a database that is temporarily stored and managed by the database system.
+- Temporary can local or global.
+- local temp tables have physical representation stored in **tempdb**.
+- specified with prefix `#` ( for example `#table_name`)
+- local temp table is owned by the session that created it and it visible only to other session.
+- automatically dropped when the creating session terminates.
+
+- Global Temporary table are visible to any user and any connection after they are created, and are deleted when all users that are referencing the table disconnect from database.
+- prefix with `##`
+
+```SQL
+CREATE TABLE #project_temp 
+  (
+    project_no CHAR(4) NOT NULL,
+    project_name CHAR(25) NOT NULL
+  );
+
+-- --------***********************---***************
+SELECT project_no, project_name 
+  INTO #project_temp1
+  FROM project;
+```
+
+## JOIN Operator
+
+- used to retrieve data from more than one table.
+- allows data to be spread over many tables and thus achieves a vital property (NON redundant data)
+- attaches the column of tables whereas in UNION is attaches the rows of tables
+
+### Two syntax form to implement joins
+
+- Explicit join syntax (ANSI SQL:1992 join syntax)
+- IMPLICIT JOIN syntax ( old-style join syntax)
+
+using the corresponding for each type of join operation. the keywords concerning the explicit definition of join are:
+
+- CROSS JOIN
+- [INNER] JOIN
+- LEFT [OUTER] JOIN
+- RIGHT [OUTER] JOIN
+- FULL [OUTER] JOIN
+
+`CROSS JOIN` specifies cartesian product of two tables. `INNER JOIN` defines the natural join of two tables, While LEFT OUTER JOIN and RIGHT OUTER JOIN characterize the join operations of the same names .
+FULL OUTER JOIN specifies the union of the right and left outer joins.
+
+> Use of explicit join syntax is recommended.
+
+## Natural Join
+
+- also known as `equi-join`.
+- the equi join operation has one or more pairs of columns that have identical values in every row. The operation that eliminates such columns from the equi-join is called a natural join.
+
+```SQL
+SELECT employee.*, department.* 
+  FROM employee  INNER JOIN department 
+  ON employee.dept_no = department.dept_no;
+```
+
+- The `ON` clause is also part of the FROM clause, it specifies the join condition from both tables.
+
+```SQL
+SELECT employee.* , department.*
+  from employee, department
+  WHERE employee.dept_no = department.dept_no;
+```
+
+- the semantics of the corresponding join columns must be identical. this means both columns must have the same logical. it is not required that the corresponding join columns have the same name, although this will often we case.
+
+> database systems can check only the data type and the length of string data types. The Database Engine requires that the corresponding join columns have compatible data types, such as INT and SMALLINT.
+
+Qualifying a column name means that, to avoid any possible ambiguity about which table teh column belongs to column name is preceded by its table name, separated by a period.
+
+```SQL
+SELECT dept_no 
+  FROM employee JOIN works_on
+  ON employee.emp_no = works_on.emp_no 
+  WHERE enter_date = '10.15.2017';
+```
+
+#### Joining More than two tables
+
+Theoretically, there is no upper limit on number of tables that can be joined using a SELECT statement.
+the DB Engine has an implementation restriction: the maximum number of  tables that can be joined in a select statement is 64.
