@@ -136,3 +136,33 @@ will be retrieved (one by one) with the cursor.
 - the DEALLOCATE statement DEALLOCATE the particular cursor
 
 > Do not use the implementation with CURSOR unless absolutely necessary. The record-oriented processing og rows is significantly slower than the set-oriented processing.
+
+## Miscellaneous Procedural Statement
+
+### RETURN
+
+- statement has the same functionality inside a batch as the BREAK statement inside WHILE.
+- causes the execution of the batch to terminate and the first statement following the end of the batch to begin executing.
+
+### GOTO
+
+- statement branches to a label, which stands in front of a Transact-SQL statement within a batch.
+
+### RAISERROR()
+
+- statement generates a user-defined error message and sets a
+system error flag.
+- user-defined error number must be greater than 50000.
+- All error numbers <= 50000 are system defined and are reserved by the Database Engine.
+- error values are stored in the global variable `@@error`.
+
+### WAITFOR
+
+defines either the time interval (if the DELAY option is used) or a specified time (if the TIME option is used) that the system has to wait before executing the next statement in the batch
+
+```SQL
+WAITFOR {DELAY 'time' | TIME 'time' | TIMEOUT 'timeout'}
+--  TIMEOUT specifies the amount of time, in milliseconds, to wait for a message to arrive in the queue. 
+```
+
+## Exception Handling with TRY, CATCH, and THROW
