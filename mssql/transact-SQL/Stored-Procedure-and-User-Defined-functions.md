@@ -200,3 +200,112 @@ ORDER BY JobTitle
 OFFSET (@PageSize * (@CurrentPage - 1)) ROWS 
     FETCH NEXT @PageSize ROWS ONLY;
 ```
+
+## Stored Procedures
+
+- stored procedure is a special kind of batch written in Transact-SQL, using the SQL language and its procedural extensions
+- stored a DB object. stored procedures are saved on the server side to improve the performance and consistency of repetitive tasks.
+- System procedures are provided with the Database Engine and can be used to access and modify the information in the system catalog
+- stored procedure is precompiled before it is stored as an object in the database
+  - the repeated compilation of a procedure is (almost always) eliminated
+  - the execution performance is therefore increased.
+    - concerning the volume of data that must be sent to and from the database system
+
+> Stored procedures can be natively compiled, meaning that the particular procedure is compiled when it is created, rather than when it is executed.
+
+### Creation and Execution of Stored Procedures
+
+```SQL
+CREATE PROC[EDURE] [schema_name.]proc_name  
+[({@param1} type1 [ VARYING] [= default1] [OUTPUT])] {, …} 
+[WITH {RECOMPILE | ENCRYPTION | EXECUTE AS 'user_name'}] 
+[FOR REPLICATION] 
+AS batch | EXTERNAL NAME method_name
+
+-- EXPLANATION
+    -- schema_name is the name of schema to which ownership of created stored procedure is assigned
+```
+
+***EXPLANATION***
+
+- schema_name is the name of schema to which ownership of created stored procedure is assigned
+- proc_name is name of stored procedure
+- @param1 is a parameter of type1 
+- default1 specifies the optional default value of the corresponding parameter
+-  OUTPUT option indicates that the parameter is a return parameter and can be returned to the calling procedure or to the system
+-  you want to generate the compiled form each time the procedure is executed, use the WITH `RECOMPILE` option
+- `EXECUTE AS` clause specifies the security context under which to execute the stored procedure after it is accessed.
+-  only the members of the sysadmin fixed server role, and the db_owner and db_ddladmin fixed database roles, can use the CREATE PROCEDURE statement.
+
+```SQL
+GO 
+CREATE PROCEDURE increased_budget (@percent INT=5)
+    AS UPDATE project SET budget = budget + budget*@percent /100;
+
+--  GO statement is used to separate two batches. (The CREATE PROCEDURE statement must be the first statement in the batch.
+```
+
+- it is possible to create temporary stored procedures that are always placed in the temporary system database called tempdb.
+- Analogous to local and global temporary tables, you can create local or global temporary procedures by preceding the procedure name with a single pound sign (#proc_name) for local temporary procedures and a double pound sign (##proc_name) for global temporary procedures
+- A local temporary stored procedure can be executed only by the user who created it, and only during the same connection
+- life cycle of a stored procedure has two phases: its creation and its execution.
+- EXECUTE statement executes an existing procedure.  execution of a stored procedure is allowed for each user who either is the owner of or has the EXECUTE privilege for the procedure
+
+```sql
+ [[EXEC[UTE]] [@return_status =] {proc_name  
+        | @proc_name_var} 
+        {[[@parameter1 =] value | [@parameter1=] @variable [OUTPUT]] | 
+DEFAULT}.. 
+        [WITH RECOMPILE]
+
+-- return_status is an optional integer variable that stores the return status of a procedure. 
+-- The value of a parameter can be assigned using either a value (value) or a local variable (@variable)
+--  DEFAULT clause supplies the default value of the parameter as defined in the procedure.
+```
+
+```sql
+CREATE PROCEDURE delete_emp @employee_no INT, @counter INT OUTPUT 
+    AS SELECT @counter = COUNT(*) 
+            FROM works_on 
+            WHERE emp_no = @employee_no; 
+    DELETE FROM employee 
+            WHERE emp_no = @employee_no; 
+        DELETE FROM works_on 
+            WHERE emp_no = @employee_no;
+
+DECLARE @quantity INT; 
+EXECUTE delete_emp @employee_no=28559, @counter=@quantity OUTPUT;
+```
+
+>  The value of the parameter will be returned to the calling procedure if the OUTPUT option  is used. @counter parameter must be declared with the OUTPUT option in the procedure as well as in the EXECUTE statement
+
+### The EXECUTE Statement with RESULT SETS Clause
+
+- can change conditionally the form of the result set of a stored procedure.
+
+```sql
+GO 
+CREATE PROCEDURE employees_in_dept (@dept CHAR(4)) 
+ AS SELECT emp_no, emp_lname  
+   FROM employee  
+   WHERE dept_no IN (SELECT @dept FROM department  
+                       GROUP BY dept_no)
+
+
+-- with results sets
+USE sample; 
+EXEC employees_in_dept 'd1' 
+  WITH RESULT SETS 
+  ( ([EMPLOYEE NUMBER] INT NOT NULL, 
+    [NAME OF EMPLOYEE] CHAR(20) NOT NULL));
+```
+
+- allows you to change the name and data types of columns displayed in the result set.
+- this functionality gives you the flexibility to execute stored procedures and display the output result sets in another form.
+
+### Changing the Structure of Stored Procedures
+
+-  ALTER PROCEDURE statement, which modifies the structure of a stored procedure
+- ALTER PROCEDURE statement is usually used to modify Transact-SQL statements inside a procedure.
+- A stored procedure is removed using the DROP PROCEDURE statement
+-  owner of the stored procedure and the members of the db_owner and sysadmin fixed roles can remove the procedure.
