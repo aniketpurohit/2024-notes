@@ -165,4 +165,38 @@ WAITFOR {DELAY 'time' | TIME 'time' | TIMEOUT 'timeout'}
 --  TIMEOUT specifies the amount of time, in milliseconds, to wait for a message to arrive in the queue. 
 ```
 
-## Exception Handling with TRY, CATCH, and THROW
+## Exception Handling with TRY, CATCH, and THROW\
+
+- exception is a problem (usually an error) that prevents the continuation of a program
+
+BENEFITS
+
+- provide a clean way to check for errors without cluttering code.
+- provide a mechanism to signal errors directly rather than using some side effects.
+- Exceptions can be seen by the programmer and checked during the compilation process.
+- `THROW` statement is another return mechanism, which behaves similarly to the already described `RAISERROR()` statement.
+
+```SQL
+BEGIN TRY 
+    BEGIN TRANSACTION
+    INSERT into employee values(1111, 'Ann' 'smith','d2');
+    INSERT into employee values(22222, 'Mattew' , 'Jones', 'd4'); -- referential integrity error
+    COMMIT TRANSACTION 
+    PRINT 'Transaction committed'
+END TRY 
+BEGIN CATCH 
+    ROLLBACK 
+    PRINT 'TRansaction rolled back'
+    THROW
+END CATCH
+
+-- that supports server-side paging
+DECLARE @pageSize TINYINT = 20,  @CurrentPage INT     = 4;
+
+SELECT BusinessEntityID, JobTitle, BirthDate  
+   FROM HumanResources.Employee 
+   WHERE Gender = 'F' 
+ORDER BY JobTitle 
+OFFSET (@PageSize * (@CurrentPage - 1)) ROWS 
+    FETCH NEXT @PageSize ROWS ONLY;
+```
