@@ -230,12 +230,12 @@ AS batch | EXTERNAL NAME method_name
 
 - schema_name is the name of schema to which ownership of created stored procedure is assigned
 - proc_name is name of stored procedure
-- @param1 is a parameter of type1 
+- @param1 is a parameter of type1
 - default1 specifies the optional default value of the corresponding parameter
--  OUTPUT option indicates that the parameter is a return parameter and can be returned to the calling procedure or to the system
--  you want to generate the compiled form each time the procedure is executed, use the WITH `RECOMPILE` option
+- OUTPUT option indicates that the parameter is a return parameter and can be returned to the calling procedure or to the system
+- you want to generate the compiled form each time the procedure is executed, use the WITH `RECOMPILE` option
 - `EXECUTE AS` clause specifies the security context under which to execute the stored procedure after it is accessed.
--  only the members of the sysadmin fixed server role, and the db_owner and db_ddladmin fixed database roles, can use the CREATE PROCEDURE statement.
+- only the members of the sysadmin fixed server role, and the db_owner and db_ddladmin fixed database roles, can use the CREATE PROCEDURE statement.
 
 ```SQL
 GO 
@@ -277,7 +277,7 @@ DECLARE @quantity INT;
 EXECUTE delete_emp @employee_no=28559, @counter=@quantity OUTPUT;
 ```
 
->  The value of the parameter will be returned to the calling procedure if the OUTPUT option  is used. @counter parameter must be declared with the OUTPUT option in the procedure as well as in the EXECUTE statement
+> The value of the parameter will be returned to the calling procedure if the OUTPUT option  is used. @counter parameter must be declared with the OUTPUT option in the procedure as well as in the EXECUTE statement
 
 ### The EXECUTE Statement with RESULT SETS Clause
 
@@ -305,7 +305,7 @@ EXEC employees_in_dept 'd1'
 
 ### Changing the Structure of Stored Procedures
 
--  ALTER PROCEDURE statement, which modifies the structure of a stored procedure
+- ALTER PROCEDURE statement, which modifies the structure of a stored procedure
 - ALTER PROCEDURE statement is usually used to modify Transact-SQL statements inside a procedure.
 - A stored procedure is removed using the DROP PROCEDURE statement
--  owner of the stored procedure and the members of the db_owner and sysadmin fixed roles can remove the procedure.
+- owner of the stored procedure and the members of the db_owner and sysadmin fixed roles can remove the procedure.
