@@ -309,3 +309,150 @@ EXEC employees_in_dept 'd1'
 - ALTER PROCEDURE statement is usually used to modify Transact-SQL statements inside a procedure.
 - A stored procedure is removed using the DROP PROCEDURE statement
 - owner of the stored procedure and the members of the db_owner and sysadmin fixed roles can remove the procedure.
+
+## User-Defined Functions
+
+Use-Defined functions can be
+
+- Scalar
+  - return value is always a single value
+  - scalar functions can be called using `EXECUTE` statement,
+
+- Table-valued
+  - returns data of a table type
+
+### CREATION AND EXECUTION OF UDFs
+
+```SQL
+CREATE FUNCTION [schema_name.]function_name 
+    [({@param } type [= default])  {,...} 
+    RETURNS {scalar_type | [@variable] TABLE} 
+    [WITH {ENCRYPTION | SCHEMABINDING} 
+    [AS] {block | RETURN (select_statement)}
+```
+
+- **schema_name** name of the schema to which the ownership of created UDF is assigned.
+- **function_name** name of new function.
+- **@param** is an input parameter.
+- **default** specifies the optional default value of the corresponding parameter.
+- `RETURNS` defines data type of the value returned by UDF. (with the exception of `TIMESTAMP`)
+- `WITH ENCRYPTION` encrypts the information in the system catalog that contains the text of `CREATE FUNCTION`. OR  `WITH SCHEMABINDING` binds the UDF to the database objects that it references. Any attempt to modify the structure of the database object that the function references fails.
+  - Database objects that are referenced by a function must fulfill the following conditions if you want to use the SCHEMABINDING clause during the creation of that function:
+    - All views and UDFs referenced by the function must be schema-bound.
+    - All database objects (tables, views, or UDFs) must be in the same database as the function
+
+**block** is the BEGIN/END block that contains the implementation of the function. final statement of the block must be a RETURN statement with an argument.
+
+- Assignment statement such as SET
+- Control-of-flow statements such as WHILE and IF
+- DECLARE statements defining local data variables.
+- SELECT statements containing SELECT lists with expressions that assign to variables that are local to the function.
+- INSERT, UPDATE and DELETE statements modifying variables of TABLE data type that are local to the function.
+
+```SQL
+-- This function computes additional total costs that arise 
+-- if budgets of projects increase
+
+GO CREATE FUNCTION compute_costs (@percent INT=10)
+    RETURNS DECIMAL(16,2)
+    BEGIN 
+        DECLARE @additional_costs DEC (14,2), @sum_budget dec(16,2)
+    SELECT @sum_budget = SUM(budget) FROM project
+    SET @additional_costs = @sum_budget *@percent /100
+    RETURN @additional_costs
+END
+
+
+-- INVOKING 
+SELECT project_no, project_name FROM project 
+WHERE budget < dbo.compute_costs(25)
+```
+
+### SCALAR UDF Inlining
+
+prior to SQL Server 2019, scalar user-defined functions are generally a performance issue because they are generally processed in a row-oriented way, meaning that they run for every returned row.
+
+- and did not allowed parallel execution of rows.
+- allows certain scalar UDFs to have their definitions directly into query so that the query does not call the UDF executing each row.
+
+### TABLE- Valued Functions
+
+- RETURNS clause specifies TABLE with no accompanying list of columns, the function is an inline function.
+- he Query Optimizer may inline a function’s text into a query and thus optimize a query as a whole.
+- Multistatement table-valued functions are difficult to optimize, and are not considered by the Query Optimizer.
+
+```SQL
+CREATE FUNCTION employees_in_project (@pr_number CHAR(4))
+    RETURNS TABLE 
+    AS RETURN (SELECT emp_fname, empl_name FROM works_on, employee
+    WHERE employee.emp_no = works_on.emp_no 
+    AND project_no = @pr_number)
+
+-- calling of function 
+SELECT * FROM employees_in_project('p3')
+```
+
+### TABLE-VALUED functions and APPLY
+
+`APPLY` operator is a relational operator that allows you to invoke a table-valued function for each row of table expression.
+
+- CROSS APPLY
+  - returns those rows from the inner (left) table expression that match rows in the outer (right) table expression.
+  - logically same as INNER JOIN
+  - advantage of the CROSS JOIN is that it can yield a better execution plan and better performance, since it can limit the set being joined, before the join occurs
+- OUTER JOIN
+  - returns all the rows from inner table expression.
+  - rows for which there is no corresponding matches in the outer table expression
+  - equivalent to LEFT OUTER JOIN
+
+```SQL
+CREATE FUNCTION dbo.fn_getjob(@empid as INT)
+RETURNS TABLE AS
+    RETURN 
+    SELECT job FROM works_on WHERE emp_no = @empid
+    AND job is NOT NULL AND project_no ='p1';
+
+-- USE CROSS APPLY 
+SELECT E.emp_no, emp_fname, enp_lname, job FROM employee as E
+CROSS APPLY dbo.fn_getjob(E.emp_no) AS A
+
+-- USE OUTER APPLY 
+SELECT E.emp_no, emp_fname, emp_lname, job FROM employee as E 
+    OUTER APPLY dbo.fn_getjob(E.emp_no) as A
+```
+
+#### TABLE-VALUED Parameter
+
+```SQL
+GO 
+CREATE TYPE departmentType as TABLE
+    (dept_no  CHAR(4),dept_name CHAR(25),location CHAR(30));
+
+GO 
+CREATE TABLE #dallasTable 
+  (dept_no CHAR(4),dept_name CHAR(25),location CHAR(30));
+
+GO 
+CREATE PROCEDURE insertProc 
+  @Dallas departmentType READONLY 
+  AS SET NOCOUNT ON 
+  INSERT INTO #dallasTable (dept_no, dept_name, location) 
+   SELECT * FROM @Dallas
+
+GO 
+DECLARE @Dallas AS departmentType; 
+INSERT INTO @Dallas( dept_no, dept_name, location) 
+SELECT * FROM department 
+WHERE location = 'Dallas' 
+EXEC insertProc @Dallas;
+```
+
+The use of table-valued parameters gives you the following benefits:
+ • It simplifies the programming model in relation to routines.
+ • It reduces the round trips to the server.
+ Part II
+ • The resulting table can have different numbers of rows.
+
+- removed using the DROP FUNCTION statement.
+- supports the ALTER FUNCTION statement, which modifies the structure of a UDF.
+- the owner of the function(or the members of the db_owner and sysadmin fixed database roles) can remove the function.
