@@ -85,4 +85,178 @@ created.
 - The IGNORE_DUP_KEY option causes the system to ignore the attempt to insert duplicate values in the indexed column(s).
 - ALLOW_ROW_LOCKS option specifies that the system uses row locks when this option is activated (set to ON).
 - ALLOW_PAGE_LOCKS option specifies that the system uses page locks when this option is set to ON
-- The STATISTICS_NORECOMPUTE option specifies that statistics of the specified index  should not be automatically recomputed. (
+- The STATISTICS_NORECOMPUTE option specifies that statistics of the specified index  should not be automatically recomputed.
+
+```SQL
+CREATE INDEX i_empno ON employee (emp_no);
+
+CREATE UNIQUE INDEX i_empno_prno 
+    ON works_on (emp_no, project_no) 
+    WITH FILLFACTOR=80;
+```
+
+### Editing Information Concerning Indices
+
+- **sys.indexes**
+  - catalog view contains a row for each index and a row for each table without a clustered index.
+  - important columns of this view are object_id( name of DB object to which the index belongs), name, and index_id(name and the ID of that index).
+
+- **sys.index_columns**
+  - contains a row per column that is part of an index or a heap.
+  - information can be used together with the information from sys.indexes to obtain further properties of specific index.
+
+- **sp_helpindex**
+  - system procedure displays all indices on a table as well as column statistics.
+  - `sp_helpindex [@db_object=] 'name'`
+- **OBJECTPROPERTY**
+  - property function has two properties in relation to indices: IsIndexed and IsIndexable.
+  - IsIndexed : whether a table or view has an index,
+  - IsIndexable : whether a table or view can be indexed.
+
+- **sys.dm_db_index_usage_stats**
+  - dynamic management view (DMV) returns counts of different types of index operations and the time each type of operation was last performed.
+  - Every individual seek, lookup, or update on the specified index by one query execution is counted as a use of that index and increments the corresponding counter in this DMV
+
+### Editing Information Concerning Index Fragmentation
+
+*fragmented* meaning the storage of data in ots pages is done inefficiently.
+
+- **Internal**
+  - occurs when there is empty space in the index pag, which can happen due to write operations.
+- **external**
+  - when logical order of the pages is wrong.
+
+DVM **sys.dm_db_index_physical_stats** returns the size and fragmentation information for the data and indices of the specified table.  one row is returned for each level of the B+-tree.
+
+```SQL
+DECLARE @db_id INT; 
+DECLARE @tab_id INT; 
+DECLARE @ind_id INT; 
+SET @db_id = DB_ID('sample'); 
+SET @tab_id = OBJECT_ID('employee'); 
+SELECT avg_fragmentation_in_percent, 
+ FROM sys.dm_db_index_physical_stats 
+(@db_id, @tab_id, NULL, NULL, NULL)
+
+-- parameters 
+/*
+The first three specify the IDs of the current database, table, and index, respectively. 
+The fourth specifies the partition ID , and the last one specifies the scan level that is used to obtain statistics
+*/
+```
+
+- sys.dm_db_index_physical_stats view has several columns, of which avg_fragmentation_in_percent and avg_page_space_used_in_percent are the most important.
+
+## altering Indices
+
+- statement can be used for index maintenance activities
+- ALTER INDEX statement supports three other activities additional from Create INDEX
+  - Reorganizing leaf index pages using the REORGANIZE option
+  - Disabling an index using the DISABLE option
+  - Rebuilding an index using the REBUILD option
+
+### Reorganizing Leaf Index Pages
+
+- REORGANIZE option of the ALTER INDEX statement specifies that the leaf pages of the corresponding index structure will be reorganized so that the physical order of the pages matches the left-to-right logical order of the leaf nodes.
+- this option removes some of the fragmentation from an index, thus improving performance.
+
+### Disabling an Index
+
+- DISABLE option of the ALTER INDEX statement disables an existing index.
+- Each disabled index is unavailable for use until you enable it again. hence, indices must be completely rebuilt if you want to use them again.
+- use the REBUILD option of the ALTER TABLE statement.
+
+### Rebuilding an Index
+
+- If the data is indexed, index fragmentation can
+occur as well, and the information in the index can get scattered on different physical pages.
+- Fragmented index data can cause the Database Engine to perform additional data reads, which decreases the overall performance of the system.
+- two ways in which you can rebuild an index
+  - Use the REBUILD option of ALTER INDEX statement.
+  - Use of DROP_EXISTING option of CREATE INDEX statement
+
+- If you specify ALL instead of an index name, all indices of the table will be rebuilt
+
+### Creation of Resumable Online Indices
+
+- SQL Server 2019 supports the creation of resumable online indices
+- feature allows you to pause the build and then restart it later at the point it was paused.
+- new option of the CREATE INDEX called RESUMABLE allows you to create a resumable online index.
+
+```SQL
+GO 
+SELECT PersonID, StoreID, TerritoryID, AccountNumber, ModifiedDate
+INTO sample.dbo.My_Customers
+FROM AdventureWorks.Sales.Customer;
+
+GO 
+INSERT INTO My_Customers
+SELECT SELECT PersonID, StoreID, TerritoryID, AccountNumber, ModifiedDate
+FROM sample.dbo.My_Customers
+GO 80
+--  GO 80, executes the INSERT statement 80 times. 
+
+GO 
+  CREATE INDEX I_MyCustomers 
+  ON My_Customers 
+     (PersonID, StoreID, TerritoryID, AccountNumber,ModifiedDate) 
+       WITH (RESUMABLE = ON, ONLINE = ON); 
+USE sample; 
+GO 
+ALTER INDEX I_MyCustomers ON My_Customers 
+ PAUSE; 
+GO
+
+--  a resumable index is only supported with online operations
+```
+
+- CREATE INDEX statement supports an additional clause called MAX_DURATION, specify the maximum time interval for building a resumable online index. Once the specified time is up, the index build automatically gets paused if it has not completed
+
+- percentage of index creation using the sys.index_resumable_operations system view. This view monitors and checks the current execution status for a resumable online index.
+
+```SQL
+SELECT name, percent_complete, state 
+    FROM sys.index_resumable_operations;
+-- name column displays the name of resumaable index, 
+-- percent_complete displays the percentage index creation has completed
+-- state displays the operational state for resumable index (0 means running 1 mean paused)
+```
+
+### Removing and Renaming Indices
+
+- DROP INDEX statement removes one or more existing indices from the current database.
+
+> removing the clustered index of a table can be a very resource-intensive operation, because all nonclustered indices will have to be rebuilt
+
+```SQL
+DROP INDEX i_empno ON employee;
+
+--  MOVE TO, which is analogous to the ON option of CREATE INDEX. 
+-- you can specify a location to which move the data rows that are currently in leaf pages of the clustered index.
+```
+
+> DROP INDEX statement cannot be used to remove indices that are implicitly generated by the system for integrity constraints. You must drop the constraint.
+> **SP_rename** can be used to rename indices
+
+### Guidelines  for creating and Using Indices
+
+- each index uses a certain amount of disk space, so it is possible that the total number of index pages could exceed the number of data pages within a database.
+- in contrast to the benefits of using an index for retrievals, inserts and updates have a direct impact on the maintenance of the index
+
+#### Indices and condition in WHERE Clause
+
+- use of an index is especially recommended  if the selectivity of the condition is high
+- selectivity of a condition is defined as the ratio of the number of rows satisfying the condition to the total number of rows in the table.
+- The column should not be indexed if the selectivity of the condition is constantly 80 percent or more.  additional I/O operations will be needed for the existing index pages, which would eliminate any time savings gained by index access
+
+```SQL
+CREATE INDEX i_works ON works_on(emp_no, enter_date); 
+SELECT emp_no, project_no, enter_date 
+FROM works_on 
+WHERE emp_no = 29346 AND enter_date='1.4.2016';
+```
+
+#### Indices and the Join Operator
+
+- it is recommended that you index each join column
+- you specify the PRIMARY KEY and FOREIGN KEY integrity constraints for the corresponding join columns, only a nonclustered index for the column with the foreign key should be created, because the system will implicitly create the clustered index for the PRIMARY KEY column.
