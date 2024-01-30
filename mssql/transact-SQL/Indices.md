@@ -217,7 +217,7 @@ GO
 ```SQL
 SELECT name, percent_complete, state 
     FROM sys.index_resumable_operations;
--- name column displays the name of resumaable index, 
+-- name column displays the name of resumable index, 
 -- percent_complete displays the percentage index creation has completed
 -- state displays the operational state for resumable index (0 means running 1 mean paused)
 ```
@@ -254,9 +254,72 @@ CREATE INDEX i_works ON works_on(emp_no, enter_date);
 SELECT emp_no, project_no, enter_date 
 FROM works_on 
 WHERE emp_no = 29346 AND enter_date='1.4.2016';
+
+--both of the columns appearing in each condition should be indexed using a composite nonclustered index
 ```
 
 #### Indices and the Join Operator
 
 - it is recommended that you index each join column
 - you specify the PRIMARY KEY and FOREIGN KEY integrity constraints for the corresponding join columns, only a nonclustered index for the column with the foreign key should be created, because the system will implicitly create the clustered index for the PRIMARY KEY column.
+
+```SQL
+SELECT emp_lname, emp_fname 
+  FROM employee, works_on 
+  WHERE employee.emp_no = work_on.emp_no
+  AND enter_date = '10.15.2017';
+
+  -- creation of indices for emp_no column in both employee and works_on table is recommended.
+```
+
+#### Covering Index
+
+- significant performance gains can be achieved when all columns in the query are included in the index.
+
+```SQL
+GO 
+DROP INDEX Person.Address.IX_Address_StateProvinceID; 
+GO 
+CREATE INDEX i_address_zip 
+  ON Person.Address (PostalCode)  
+  INCLUDE (City, StateProvinceID); 
+GO 
+SELECT City, StateProvinceID 
+  FROM Person.Address 
+  WHERE PostalCode = '84407';
+```
+
+> Covering indices is recommended because index pages generally contain many more entries than corresponding data pages contain. Also to use this method, the filtered columns must be first key columns on the index.
+
+### Missing Indices
+
+The DB engine provides several ways to assist in determining whether an index will be helpful to accelerate query performance.
+
+- `sys.dm_db_missing_index_details`
+- `sys.dm_db_missing_index_group_stats`
+- `sys.dm_db_missing_index_groups`
+- `sys.dm_db_missing_index_columns`
+
+### Using `sys.dm_db_missing_index_details`
+
+- The most important columns in sys.dm_db_missing_index_details are:
+  - equality_columns:
+    - displays all columns that have been used in the WHERE clause of the query and with an (=) operator.
+  - inequality_columns
+    - displays a comma-separated list of columns that contribute to inequality predicates.
+
+  - statement
+    - column identifies the table against which query was executed.
+    - Generally, equality columns should be put before the inequality ones, and together they should make the key of the index
+
+```SQL
+CREATE INDEX i1 ON AdventureWorks.Sales.Store (Name,BusinessEntityID,ModifiedDate)
+```
+
+## Special types of Indices
+
+- indexed Views
+- Filtered Views
+- Indices on computed columns
+- partitioned indices
+- Column store indices
