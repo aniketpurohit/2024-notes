@@ -82,7 +82,7 @@ There are 3 types of user forms:
 ```SQL
 USE master;
 CREATE MASTER KEY
-ENCRYPTION BY PASSWORD ='pls4w9dl' -- you passsword
+ENCRYPTION BY PASSWORD ='pls4w9dl' -- you password
 
 GO 
 CREATE CERTIFICATE cert01
@@ -92,3 +92,28 @@ CREATE CERTIFICATE cert01
 -- if this option is not used CERTIFICATE is protected by DB master key 
 -- 
 ```
+
+## Editing Metadata Concerning User Keys
+
+- sys.symmetric_keys
+- sys.asymmetric_keys
+- sys.certificates
+- sys.database_principals
+  - provides information about each of principals in the current information concerning existing certificates.
+  
+## Extensive Key management
+
+- It is also known as EKM
+  - Enhanced key security through a choice of encryption provider.
+  - General key management across your enterprise
+- EKM allows third party vendors to register their devices in the DB Engine.
+- EKM also allows data protection form DB administrators (except members of the **sysadmin** group)
+- Data can be encrypted and decrypted using T-SQL cryptographic Statements.
+- DB Engine uses the external EKM as the key store.
+
+## Methods of Data Encryption
+
+### Transparent Data Encryption
+
+- TDE option that encrypts the DB files automatically, without needing to alter any applications.
+- 
