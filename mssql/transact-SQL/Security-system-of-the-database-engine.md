@@ -116,4 +116,26 @@ CREATE CERTIFICATE cert01
 ### Transparent Data Encryption
 
 - TDE option that encrypts the DB files automatically, without needing to alter any applications.
-- 
+- prevent access by unauthorized persons even if they obtain DB files or Db backup files.
+- performed at the page level
+- based on a encryption key, symmetric key, which secures encrypted DB.
+
+Steps
+
+1. Create a DB master key
+2. create a certificate
+3. Create a Encryption key
+4. Configure DB to use encryption
+
+```SQL
+-- associate the certificate to sample DB
+CREATE DATABASE ENCRYPTION KEY 
+WITH ALGORITHM = AES_128
+ENCRYPTION BY SERVER CERTIFICATE cert_01;
+
+-- Encrypt the DB 
+ALTER DATABASE sample SET ENCRYPTION ON;
+
+-- sys.dm_database_encryption_keys, which can be used to display all databases that are encrypted.
+--
+```
