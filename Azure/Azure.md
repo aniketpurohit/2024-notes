@@ -58,4 +58,17 @@
   - data processing requires less computational resources, reducing both the time and cost.
 - **Data redundancy**
   - takes advantage of Azure Blob replication models that provide data redundancy in a single center with locally redundant storage (LRS), or GRS.
-  -   
+
+### Enable Azure Data lake storage GEN2
+- Azure Data lake storage Gen2 isn't a standalone Azure service, but rather a configurable of **StorgaeV2**.
+- To enable from Storage account, you can select option **Enable Hierarchial namespace** in the **Advanced** page when creating the storage account
+
+### Comparison Azure Data Lake Store to Azure Blob storage 
+**In Azure Blob**
+- large amounts of unstructured ("object") data in a flat namespace within a blob container
+- can include "/" characters to organize blobs into virtual "folders", but in terms of blob manageability the blobs are stored as a single-level hierarchy in a flat namespace.
+- can access this data by using HTTP or HTTPs
+
+**Azure Data Lake Storage Gen2**
+- builds on blob storage and optimizes I/O of high-volume data by using a hierarchical namespace that organizes blob data into directories, and stores metadata about each directory and the files within it.
+- 
