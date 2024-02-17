@@ -138,4 +138,64 @@ ALTER DATABASE sample SET ENCRYPTION ON;
 
 -- sys.dm_database_encryption_keys, which can be used to display all databases that are encrypted.
 --
+SELECT * FROM sys.dm_database_encryption_keys WHERE encryption_state =3;
+```
+
+### Always Encrypted
+
+- encrypt particular columns of a Database.
+
+> columns belonging to primary keys, and other non-sensitive columns should not be encrypted for performance reasons.
+
+- Database driver handles the process of encrypting and decrypting of data.
+- When query is executed it looks up the master key. the master key is then used to decrypt a column specific key. which in turn used for encrypting and decrypting fields and parameters.
+
+STEPS
+
+1. Create a column master key (CMK)
+2. create a column encryption key (CEK)
+3. Create a table with one or more encrypted columns.
+
+- The column master key is used to protect column encryption key. the column master key definition object is created in DB. This object will store the information about the location of column master key.
+- The easiest option for developing new application using Always Encryption is to use a certificate.
+
+> can create a column master key using the `CREATE COLUMN MASTER KEY`statement.  create a column encryption key using the `CREATE COLUMN ENCRYPTION KEY` statement.
+
+```SQL
+CREATE TABLE employee_encr(
+  emp_no INT NOT NULL,
+  emp_lname nvarchar(11) COLLATE Latin1_General_BIN2 ENCRYPTED 
+    WITH (ENCRYPTION_TYPE = DETERMINISTIC, ALGORITHM='AEAD_AES_256_CBC_HMAC_SHA_256',
+    COLUMN_ENCRYPTION_KEY = MyCEK) NOT NULL,
+    salary MONEY ENCRYPTED WITH (ENCRYPTION_TYPE=RANDOMIZED,
+      ALGORITHM='AEAD_AES_256_CBC_HMAC_SHA_256', COLUMN_ENCRYPTION_KEY = MyCEK) NOT NULL
+);
+```
+
+*Deterministic encryption* ensures a given value always has the same encrypted representation. can be used to seek values, join, equality comparisons, and grouping operations.
+
+*randomized encryption* delivers a different value every time. it is more secure, because value cannot be guessed. the disadvantage is that you can not perform any operation on columns with randomized encryption.
+
+***Always Encrypted has several general limitations***
+
+- Alphanumeric columns are encrypted with deterministic encryption have to use the Latin1_General_BIN2 collation
+- indices and constraints can be created only for columns with deterministic encryption.
+- all range-like operations are disallowed.
+- Client libraries need to be updated to support encryption and decryption of columns. Not all drivers will support this functionality
+- The following data types are not supported : SQL_VARIANT, XML, GEOGRAPHY, GEOMETRY, and user-defined types (UDTs).
+
+### transparent Data encryption vs Always Encrypted
+
+- TDE is DB level. Always encrypted is column level encryption.
+- With TDE, each data page is encrypted when written on disk and is decrypted when read from disk (Encrypted at rest). Always encrypted at rest and in memory, meaning data is encrypted on the disk, in memory as well. decryption is possible in user application.
+
+#### Monitoring Always Encrypted
+
+**sys.columns_encryption_keys** is the most important catalog  view in relation to Always encrypted. the view returns information about the column encryption keys.
+
+```SQL
+SELECT t.name as table_name, c.name as column_name, c.encryption_type_desc as encr, k.name FROM sys.columns c 
+JOIN sys.column_encryption_keys k 
+ON (c.column_encryption_key_id = k.column_encryption_key_id)
+JOIN sys.tables t ON (c.object_id = t.object_id);
 ```
