@@ -470,3 +470,90 @@ GRANT SELECT ON works_on  TO mary
 - Because of the hierarchical structure of securables, you can use a “higher” securable to extend the VIEW DEFINITION (or any other base) permission
 - A principal that has been granted CONTROL also implicitly has the ability to grant permissions on the securable; in other words, the CONTROL permission includes the WITH GRANT OPTION clause
 - By default, if user A grants a permission to user B, then user B can use the permission only to execute the Transact-SQL statement listed in the GRANT statement. The WITH GRANT OPTION gives user B the additional capability of granting the privilege to other users
+
+## DENY
+
+- prevents users from performing actions
+
+```SQL
+DENY {ALL [PRIVILEGES] } | permission_list 
+ [ON [class::] securable]  TO principal_list 
+[CASCADE]  [ AS principal ]
+
+--  CASCADE, which specifies that permissions will be denied to user A and any other users to whom user A passed this permission.
+
+DENY CREATE TABLE, CREATE PROCEDURE 
+  TO peter;
+
+GRANT SELECT ON project 
+   TO PUBLIC; 
+DENY SELECT ON project 
+         TO peter, mary;
+```
+
+## REVOKE
+
+- removes one or more previously granted or deined permissions
+
+```SQL
+REVOKE [GRANT OPTION FOR]
+  { [ALL [PRIVILEGES]] | permission_list}
+  [ON [CLASS:: ] securable]
+  FROM principal_list [CASCADE] [AS principal]
+
+-- GRANT OPTION FOR is used to remove the effects of WITH GRANT OPTION meaning they will have previously granted permissions but will no longer to be able the permission to other users.
+
+REVOKE SELECT ON project FROM PUBLIC;
+```
+
+### Managing permission using SSMS
+
+- sys.database_permissions catalog view. A negative entry in the table prevents a user from performing activities.
+
+### managing Authorization and Authentication of contained database
+
+- sp_migrate_user_to_contained procedure converts a database user that is mapped to a login to a contained database user with a password.
+- sp_migrate_user_to_contained separates the user from the original login, so that settings such as password and default  language can be administered separately for the contained database.
+- you can use the dynamic management view called sys.dm_db_uncontained_entities to learn which parts of your database cannot be moved to a different server instance
+
+## Change Tracking
+
+*change tracking* refers to documenting all insert, update and delete activities that are applied to tables of the DB.
+There are 2 ways to do it :
+
+### using Triggers
+
+- to create an audit trail of activities in one or more tables of the database
+
+### usinf Change data capture (CDC)
+
+- CDC is a tracking mechanism that you can use to see changes as they happen
+- is to audit who changed what data and when, but it can also be used to support concurrency updates.
+- sys.sp_cdc_enable_db is used to enable cdc for the DB.
+- When a database is enabled for CDC, the cdc schema, cdc user, metadata tables, and other system objects are created for the database
+- cdc schema contains the CDC metadata tables
+- You enable the table by using the system stored procedure sys.sp_cdc_enable_table.
+- When a table is enabled for CDC, all DML statements are read from the transaction log and captured in the associated change table
+
+```SQL
+EXECUTE sys.sp_cdc_enable_db
+-- to check whether is_cdc_enabled or not retrieve is_cdc_enabled from sys.database
+
+EXECUTE sys.sp_cdc_enable_table 
+    @source_schema = N'dbo', @source_name = N'works_on', 
+    @role_name = N'cdc_admin'
+
+-- @source_schema parameter specifies the name of the schema in which the source table 
+-- @source_name is the name of the source table on which you enable CDC
+-- @role_name  parameter specifies the name of the database role used to allow access to data.
+-- This function allows you to query all changes that occur within a defined interval.
+--  function name is the concatenation of cdc.fn_cdc_get_all_changes_ and the value assigned to the @capture_instance parameter. 
+
+SELECT *  
+FROM cdc.fn_cdc_get_all_changes_dbo_works_on 
+     (sys.fn_cdc_get_min_lsn('dbo_works_on'), sys.fn_cdc_get_max_lsn(), 'all');
+
+-- @from_lsn and @to_lsn) to define the beginning and end of the time interval
+
+--  assignment of time boundaries is done using the sys.fn_cdc_map_time_to_lsn() function.)
+```
