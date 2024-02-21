@@ -18,3 +18,63 @@ A transaction specifies a sequence of T-SQL statements that is used by DB progra
 
 - Implicit
   - specifies any INSERT, UPDATE or DELETE statement as a transaction unit
+- Explicit
+  - A group of T-SQL statements, where the beginning and end of the group are marked using statements such as `BEGIN TRANSACTION`, `COMMIT` and `ROLLBACK`
+
+```SQL
+BEGIN TRANSACTION /* the beginning of transaction */
+UPDATE employee
+  SET emp_no=39831
+  WHERE emp_no = 10102
+  IF(@@error <>0)
+    ROLLBACK /* rollback the transaction */
+
+UPDATE works_on
+  SET emp_no=39831
+  WHERE emp_no = 10102
+  IF(@@error <>0)
+    ROLLBACK
+COMMIT /* the end of transaction */
+
+```
+
+### properties of Transactions
+
+the acronym ACID stands for Atomicity, Consistency, Isolation, Durability.
+
+- Atomicity
+  - guarantees the indivisibility of set of statements that modifies data ina database and is part of a transaction
+- Consistency
+  - will not allow the database to contain inconsistent data.
+- isolation
+  - separates concurrent transactions from each other. In other words, an active connection can't see the data modification in a concurrent and incomplete transaction.
+- Durability
+  - persistence of data.
+  - ensures that the effects of particular transaction persist even if a system error occurs.
+  - If a system error occurs while a transaction is active, all statements of that transaction wil be undone.
+  
+## T-SQL statement and transactions
+
+- `BEGIN TRANSACTION`
+  - starts the transaction
+  - transaction_name is name assigned to the transaction, which can be used only on the outermost pair of nested `BEGIN TRANSACTION/COMMIT`
+  - @trans_var is the name of a user-defined variable containing a valid transaction name
+  - WITH MARK option specifies that the transaction is to be marked in
+the log.
+  - . description is a string that describes the mark. If WITH MARK is used, a transaction name must be specified.
+
+  ```SQL
+    BEGIN TRANSACTION [{transaction_name | @trasns_var} {WITH MARK ['description']}]
+  ```
+
+- `BEGIN DISTRIBUTED TRANSACTION`
+  -  specifies the start of a distributed transaction managed by the Microsoft Distributed Transaction Coordinator (DTC)
+  -  one that involves databases on more than one server.
+  - 
+
+- `COMMIT [WORK]`
+  - successfully ends the transaction started with the BEGIN TRANSACTION statement. 
+  - 
+- `ROLLBACK [WORK]`
+- `SAVE TRANSACTION`
+- `SET IMPLICIT_TRANSACTION`
