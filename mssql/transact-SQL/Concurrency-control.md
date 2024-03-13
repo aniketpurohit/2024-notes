@@ -156,4 +156,18 @@ There are several dynamic management views that can be used to display different
   - provides snapshot data, so the result may vary each time.
   -
 - `sys.dm_db_log_space_usage`
+  - returns the space usage information for the transaction log per database
+
+  ```SQL
+  SELECT DB_NAME(database_id) as DBName, ROUND(CONVERT(FLOAT, total_log_size_in_bytes/1024)1024,2) As LogSize_in_MBs, ROUND(CONVERT(FLOAT, used_log_space_in_bytes/1024)1024,2) as LogUSEDSize_in_MB,
+  ROUND( used_log_space_in_percent,2) AS LogUsed_Percent FROM sys.dm_sb_log_space_usage;
+  ```
+
 - `sys.dm_db_log_stats`
+  - returns summary-level attributes and information on transaction log health.
+
+  ```sql
+   SELECT name AS 'DBName', log_backup_time AS 'Last log backup time' 
+  FROM sys.databases AS s 
+  CROSS APPLY sys.dm_db_log_stats(s.database_id);
+  ```
