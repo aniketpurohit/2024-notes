@@ -175,16 +175,20 @@ The Azure Synapse SQL system uses a distributed query processing model to parall
 can be integrated with other Azure data services for end-to-end analytics solutions
 
 1. Azure synapse link
-  - enables near-realtime synchronization between operational data in Azure Cosmos DB, Azure SQL Database, SQL Server, and Microsoft Power Platform Dataverse and analytical data storage that can be queried in Azure Synapse Analytics.
+
+- enables near-realtime synchronization between operational data in Azure Cosmos DB, Azure SQL Database, SQL Server, and Microsoft Power Platform Dataverse and analytical data storage that can be queried in Azure Synapse Analytics.
 
 2. PowerBI
-  - Enables data analysts to integrate a Power BI workspace into a Synapse workspace, and perform interactive data visualization
+
+- Enables data analysts to integrate a Power BI workspace into a Synapse workspace, and perform interactive data visualization
 
 3. Purview
-  - enables organizations to catalog data assets in Azure Synapse Analytics, and makes it easier for data engineers to find data assets and track data lineage when implementing data pipelines that ingest data into Azure Synapse Analytics.
 
-4. Machine Learning 
-  - enables data analysts and data scientists to integrate predictive model training and consumption into analytical solutions.
+- enables organizations to catalog data assets in Azure Synapse Analytics, and makes it easier for data engineers to find data assets and track data lineage when implementing data pipelines that ingest data into Azure Synapse Analytics.
+
+4. Machine Learning
+
+- enables data analysts and data scientists to integrate predictive model training and consumption into analytical solutions.
 
 ### When to use Azure Synapse Analytics
 
