@@ -118,4 +118,79 @@ There are four stages for processing big data solutions that are common to all a
 - Prep and train
   - used to perform data preparation and model training and scoring for machine learning solutions.
 - Model and Serve
-  - involves the technologies that will present the data to users like PowrBI
+  - involves the technologies that will present the data to users like PowerBI
+
+## Four Common type analytical technique
+
+- descriptive
+  - What is happening in my business?
+  - through the creation of a data warehouse in which historical data is persisted in relational tables for multidimensional modeling and reporting.
+
+- Diagnostic
+  - Why is it happening?
+  - This may involve exploring information that already exists in a data warehouse, but typically involves a wider search of your data estate to find more data to support this type of analysis.
+
+- Predictive
+  - What is likely to happen in the future based on previous trends and patterns?
+
+- Prescriptive
+  - Enables autonomous decision making based on real-time or near real-time analysis of data, using predictive analytics
+
+![four common types of analytical technique](https://learn.microsoft.com/en-us/training/wwl-data-ai/introduction-azure-synapse-analytics/media/types-analytics.png)
+
+## Introduction
+
+Azure Synapse Analytics provides a cloud platform for all of these analytical workloads through support for multiple data storage, processing, and analysis technologies in a single, integrated solution.
+
+Azure Synapse Analytics combines a centralized service for data storage and processing with an extensible architecture through which linked services enable you to integrate commonly used data stores, processing platforms, and visualization tools.
+
+### Working with files in a data lake
+
+One of the core resources in a Synapse Analytics workspace is a data lake, in which data files can be stored and processed at scale
+
+Data is extracted from multiple operational sources and transferred to a central data lake or data warehouse for analysis. Azure Synapse Analytics includes built-in support for creating, running, and managing pipelines that orchestrate the activities necessary to retrieve data from a range of sources, transform the data as required, and load the resulting transformed data into an analytical store.
+
+> Pipelines in Azure Synapse Analytics are based on the same underlying technology as Azure Data Factory
+
+### Querying and manipulating data with SQL
+
+Azure Synapse Analytics supports SQL-based data querying and manipulation through two kinds of SQL pool that are based on the SQL Server relational database engine:
+
+A built-in serverless pool that is optimized for using relational SQL semantics to query file-based data in a data lake.
+Custom dedicated SQL pools that host relational data warehouses.
+
+The Azure Synapse SQL system uses a distributed query processing model to parallelize SQL operations, resulting in a highly scalable solution for relational data processing. You can use the built-in serverless pool for cost-effective analysis and processing of file data in the data lake, and use dedicated SQL pools to create relational data warehouses for enterprise data modeling and reporting.
+
+### Processing and analyzing data with Apache Spark
+
+ you can create one or more Spark pools and use interactive notebooks to combine code and notes as you build solutions for data analytics, machine learning, and data visualization.
+
+### Exploring data with Data Explorer
+
+- based on the Azure Data Explorer service
+- Data Explorer uses an intuitive query syntax named Kusto Query Language (KQL) to enable high performance, low-latency analysis of batch and streaming data.
+
+### Integrating with other Azure data services
+
+can be integrated with other Azure data services for end-to-end analytics solutions
+
+1. Azure synapse link
+  - enables near-realtime synchronization between operational data in Azure Cosmos DB, Azure SQL Database, SQL Server, and Microsoft Power Platform Dataverse and analytical data storage that can be queried in Azure Synapse Analytics.
+
+2. PowerBI
+  - Enables data analysts to integrate a Power BI workspace into a Synapse workspace, and perform interactive data visualization
+
+3. Purview
+  - enables organizations to catalog data assets in Azure Synapse Analytics, and makes it easier for data engineers to find data assets and track data lineage when implementing data pipelines that ingest data into Azure Synapse Analytics.
+
+4. Machine Learning 
+  - enables data analysts and data scientists to integrate predictive model training and consumption into analytical solutions.
+
+### When to use Azure Synapse Analytics
+
+- Large-scale data warehousing
+- Advanced analytics
+- Data exploration and discovery
+- Real time analytics
+- Integrated analytics
+- Integrated analytics
