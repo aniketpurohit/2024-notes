@@ -1,13 +1,13 @@
-# introduction 
+# introduction
 
 Azure Synapse Analytics includes serverless SQL pools, which are tailored for querying data in a data lake
 
-## Serverless SQL pools in Azure Synapse Analystics
+## Serverless SQL pools in Azure Synapse Analytics
 
 Azure Synapse SQL is a distributed query system in Azure Synapse Analytics that offers two kinds of runtime environments:
-  - Serverless SQL 
-    - on-demand SQL query processing, primarily used to work with data in a data lake
 
-  - dedicated SQL pool
-    - Enterprise-scale relational database instances used to host data warehouse in which data is stored in relational tables.
+- Serverless SQL
+  - on-demand SQL query processing, primarily used to work with data in a data lake
 
+- dedicated SQL pool
+  - Enterprise-scale relational database instances used to host data warehouse in which data is stored in relational tables.
