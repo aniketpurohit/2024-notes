@@ -23,3 +23,65 @@
 
 ### Apache Spark 
 - Apache Spark is a parallel processing framework that takes advantage of in-memory processing and a distributed file storage. It's a common open-source software (OSS) tool for big data scenarios.
+
+## data Engineering in microsoft Azure
+![data engineering in microsoft azure](https://learn.microsoft.com/en-us/training/wwl-data-ai/introduction-to-data-engineering-azure/media/3-data-engineering-azure.png)
+
+This operational data must be captured, ingested, and consolidated into analytical stores; from where it can be modeled and visualized in reports and dashboards.
+
+The core Azure technologies used to implement data engineering workloads include:
+- Synapse Analytics
+- Data lake storage gen2
+- stream analytics
+- Data factory 
+- Databricks
+
+## data lake gen 2
+
+A data lake provides file-based storage, usually in a distributed file system that supports high scalability for massive volumes of data. Organizations can store structured, semi-structured, and unstructured files in the data lake and then consume them from there in big data processing technologies, such as Apache Spark
+
+A data lake is a repository of data that is stored in its natural format, usually as blobs or files.
+
+Data Lake Storage builds on Azure Blob storage capabilities to optimize it specifically for analytics workloads. This integration enables analytics performance, the tiering and data lifecycle management capabilities of Blob storage, and the high-availability, security, and durability capabilities of Azure Storage
+
+### Benefits
+Data Lake Storage is designed to deal with this variety and volume of data at exabyte scale while securely handling hundreds of gigabytes of throughput
+
+### Hadoop compatible access
+- A benefit of Data Lake Storage is that you can treat the data as if it's stored in a Hadoop Distributed File System (HDFS).
+
+### Security
+Data Lake Storage supports access control lists (ACLs) and Portable Operating System Interface (POSIX) permissions that don't inherit the permissions of the parent directory.
+
+This security is configurable through technologies such as Hive and Spark or utilities such as Azure Storage Explorer, which runs on Windows, macOS, and Linux. All data that is stored is encrypted at rest by using either Microsoft or customer-managed keys.
+
+### Performance
+Azure Data Lake Storage organizes the stored data into a hierarchy of directories and subdirectories.  data processing requires less computational resources, reducing both the time and cost
+
+### Data redundancy
+Data Lake Storage takes advantage of the Azure Blob replication models that provide data redundancy in a single data center with locally redundant storage (LRS), or to a secondary region by using the Geo-redundant storage (GRS) option. 
+
+### Azure Blob lake store vs Blob Storage
+you can store large amounts of unstructured ("object") data in a flat namespace within a blob container. Blob names can include "/" characters to organize blobs into virtual "folders", but in terms of blob manageability the blobs are stored as a single-level hierarchy in a flat namespace.
+
+![BLOB storage](https://learn.microsoft.com/en-us/training/data-ai-cert/introduction-to-azure-data-lake-storage/media/blob-store.png)
+
+Azure Data Lake Storage Gen2 builds on blob storage and optimizes I/O of high-volume data by using a hierarchical namespace that organizes blob data into directories, and stores metadata about each directory and the files within it.
+
+![Data lake storage](https://learn.microsoft.com/en-us/training/data-ai-cert/introduction-to-azure-data-lake-storage/media/data-lake.png)
+
+There are four stages for processing big data solutions that are common to all architectures:
+- Ingest 
+  - used to acquire the source data.
+  - for batch movement of data, pipelines in Azure Synapse Analytics or Azure Data Factory may be the most appropriate technology to use. For real-time ingestion of data, Apache Kafka for HDInsight or Stream Analytics may be an appropriate choice.
+- Store
+  -  where the ingested data should be placed. 
+  - Azure Data Lake Storage Gen2 provides a secure and scalable storage solution that is compatible with commonly used big data processing technologies.
+- Prep and train 
+  - used to perform data preparation and model training and scoring for machine learning solutions.
+- Model and Serve
+  -  involves the technologies that will present the data to users like PowrBI 
+
+
+
+
