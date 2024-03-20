@@ -232,3 +232,18 @@ WITH
 );
 GO 
 ```
+
+## SQL pools to transform data in data lake
+
+The SQL language includes many features and functions that enable you to manipulate data.
+- Filter rows and columns in a Dataset
+- Rename data fields and convert between data types.
+- Calculate derived data fields
+- Manipulate string values.
+- Group and aggregate data.
+
+Can be used to run SQL statements that transform data and persist the results as a file in a data lake for further processing or querying.
+CREATE EXTERNAL TABLE AS SELECT (CETAS) statement in a dedicated SQL pool or serverless SQL pool to persist the results of a query in an external table, which stores its data in a file in the data lake.
+
+![](https://learn.microsoft.com/en-us/training/wwl-data-ai/use-azure-synapse-serverless-sql-pools-for-transforming-data-lake/media/create-external-table-as-select.png)
+
