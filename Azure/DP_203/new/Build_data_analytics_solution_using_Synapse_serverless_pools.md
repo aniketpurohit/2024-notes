@@ -394,6 +394,76 @@ END
 - Provides a security boundary
   - Multiple users and client programs can perform operations on underlying database objects through a procedure, even if the users and programs don't have direct permissions on those underlying object
 - Eases maintenance
-  - ny changes in the logic or file system locations involved in the data transformation can be applied only to the stored procedure; without requiring updates to client applications or other calling functions.
+  - Any changes in the logic or file system locations involved in the data transformation can be applied only to the stored procedure; without requiring updates to client applications or other calling functions.
 - Improved performance
   - compiled the first time they're executed, and the resulting execution plan is held in the cache and reused on subsequent runs of the same stored procedure. As a result, it takes less time to process the procedure.
+
+## Lake DB in Synapse Analytics
+
+In data lake, there  is no fixed schema. Data is stored in files, which may be structured, semi-structured or Unstructured. Applications and data analysts can work directly with the files in the data lake using the tools of their choice; without the constraints of a relational database system.
+
+a *lake database* provides a relational metadata layer over one or more files in data lake. The tables reference files in the data lake, enabling you to apply relational semantics to working with the data and querying it using SQL.
+
+### Lake Database schema
+
+You can create a lake database in Azure Synapse Analytics, and define the tables that represent the entities for which you need to store data.
+Azure Synapse Analytics includes a graphical database design interface that you can use to model complex database schema, using many of the same best practices for database design that you would apply to a traditional database.
+
+### Lake database storage
+
+The data for the tables in your lake database is stored in the data lake as Parquet or CSV files. The files can be managed independently of the database tables, making it easier to manage data ingestion and manipulation with a wide variety of data processing tools and technologies.
+
+### lake database compute
+
+To query and manipulate the data through the tables you have defined by use of Serverless pool or an Synapse Apache spark pool
+
+### Explore DB templates
+
+Synapse Analytics provides a comprehensive collection of database templates that reflect common schemas found in multiple business scenarios; including:
+
+Agriculture, Automotive, Banking, Consumer goods, Energy and commodity trading, Freight and logistics, Fund management, Healthcare insurance, Healthcare provider, Manufacturing, Retail, and many others...
+
+### create a lake DB
+
+### Using a serverless SQL pool
+
+You can query a lake database in a SQL script by using a serverless SQL pool.
+
+```SQL
+USE RetailDB;
+
+GO 
+
+SELECT CustomerID, FirstName, LastName FROM Customer ORDER BY LastName;
+```
+
+> no need to use an OPENROWSET function or include any additional code to access the data from the underlying file storage. The serverless SQL pool handles the mapping to the files for you.
+
+### USING an Apache Spark Pool
+
+In addition to using a serverless SQL pool, you can work with lake database tables using Spark SQL in an Apache Spark pool.
+
+```SQL
+%%sql
+
+INSERT INTO `RetailDB`, `Customer` VALUES (123, 'John', 'Yang')
+
+%%sql
+SELECT * FROM `RetailDB`.`Customer` WHERE CustomerID = 123
+```
+
+## Secure data and manage Users
+
+Serverless SQL pool authentication refers to how user prove their identity when connecting to the endpoint
+
+- ***SQL Authentication***
+  - This authentication method uses a username and password
+
+- ***Microsoft Entra authentication***
+  - This authentication uses identities managed by microsoft Entra ID.
+  - use AD authentication whenever possible
+
+### Authorization
+
+- what a user can do within a serverless SQL pool database and is controlled by your user account's database role memberships and object-level permissions.
+- Microsoft Entra authentication is used, a user can sign in to a serverless SQL pool and other services, like Azure Storage, and can grant permissions to the Microsoft Entra user.
